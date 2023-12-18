@@ -1,0 +1,3 @@
+- Binance (https://www.binance.com/es/binance-api)
+- Huobi (https://kucoin.com/es/api)
+- Kukoin (https://github.com/Kucoin/kucoin-go-sdk)

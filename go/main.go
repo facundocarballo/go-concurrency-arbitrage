@@ -15,7 +15,7 @@ func main() {
 	// Load enviroment variables
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error cargando el archivo .env")
+		log.Fatal("Error loading the .env file")
 	}
 
 	// Exchanges

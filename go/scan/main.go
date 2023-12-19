@@ -5,11 +5,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facundocarballo/go-concurrency-arbitrage/exchange"
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange"
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/pair"
 )
 
 type Scaned struct {
-	Pair      exchange.Pair      `json:"pair"`
+	Pair      pair.Pair          `json:"pair"`
 	Exchange  exchange.IExchange `json:"exchange"`
 	Price     float64            `json:"price"`
 	Timestamp time.Time          `json:"timestamp"`
@@ -42,7 +43,7 @@ func MakeOrder(scannedA *Scaned, scannedB *Scaned) bool {
 func GetPrices(
 	ch chan Scaned,
 	mapPair map[exchange.IExchange]Scaned,
-	pair *exchange.Pair,
+	pair *pair.Pair,
 	exchanges []exchange.IExchange,
 ) {
 	for {
@@ -89,6 +90,11 @@ func AnalizePrice(
 			}
 
 			if MakeOrder(&priceScanned, &scanned) {
+				// TODO:
+				// Ejecutar la orden de un exchange.
+				// Llevar el resultado al otro exchange.
+				// Ejectuar la orden del otro exchange.
+				// Enviar el resultado positivo al exchange original.
 				fmt.Printf(
 					"(%s) in [%s] is $%f and in [%s] is $%f\n",
 					priceScanned.Pair.Symbol,
@@ -97,14 +103,13 @@ func AnalizePrice(
 					ex.GetName(),
 					scanned.Price,
 				)
-
 				mapOrders[order] = true
 			}
 		}
 	}
 }
 
-func ScanPair(pair *exchange.Pair, exchanges []exchange.IExchange) {
+func ScanPair(pair *pair.Pair, exchanges []exchange.IExchange) {
 	chPair := make(chan Scaned)
 	mapPair := make(map[exchange.IExchange]Scaned)
 	mapOrders := make(map[Order]bool)

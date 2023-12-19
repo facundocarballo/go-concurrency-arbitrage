@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/adshao/go-binance/v2"
-	"github.com/facundocarballo/go-concurrency-arbitrage/exchange"
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/pair"
 )
 
 type Binance struct {
@@ -22,7 +22,7 @@ func CreateBinanceExchange() *Binance {
 	}
 }
 
-func (exchange *Binance) GetPrice(pair *exchange.Pair) float64 {
+func (exchange *Binance) GetPrice(pair *pair.Pair) float64 {
 
 	apiKey := os.Getenv(exchange.ApiKey)
 	secretKey := os.Getenv(exchange.SecretKey)

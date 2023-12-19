@@ -1,9 +1,4 @@
-package exchange
-
-type IExchange interface {
-	GetPrice(pair *Pair) float64
-	GetName() string
-}
+package pair
 
 type Pair struct {
 	TokenA string `json:"token_a"`

@@ -4,10 +4,11 @@ import (
 	"log"
 	"sync"
 
-	"github.com/facundocarballo/go-concurrency-arbitrage/binance"
-	"github.com/facundocarballo/go-concurrency-arbitrage/exchange"
-	"github.com/facundocarballo/go-concurrency-arbitrage/huobi"
 	"github.com/facundocarballo/go-concurrency-arbitrage/scan"
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange"
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange/binance"
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange/huobi"
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/pair"
 	"github.com/joho/godotenv"
 )
 
@@ -25,10 +26,10 @@ func main() {
 	exchanges := []exchange.IExchange{binanceStruct, huobiStruct}
 
 	// Pairs
-	btcUsdt := exchange.CreatePair("BTC", "USDT")
-	ethUsdt := exchange.CreatePair("ETH", "USDT")
-	eosUsdt := exchange.CreatePair("EOS", "USDT")
-	bnbUsdt := exchange.CreatePair("BNB", "USDT")
+	btcUsdt := pair.CreatePair("BTC", "USDT")
+	ethUsdt := pair.CreatePair("ETH", "USDT")
+	eosUsdt := pair.CreatePair("EOS", "USDT")
+	bnbUsdt := pair.CreatePair("BNB", "USDT")
 
 	var wg sync.WaitGroup
 

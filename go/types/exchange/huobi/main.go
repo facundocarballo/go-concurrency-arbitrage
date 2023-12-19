@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facundocarballo/go-concurrency-arbitrage/exchange"
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/pair"
 	"github.com/huobirdcenter/huobi_golang/config"
 	"github.com/huobirdcenter/huobi_golang/pkg/client"
 )
@@ -23,7 +23,7 @@ func CreateHuobiExchange() *Huobi {
 	}
 }
 
-func (exchange *Huobi) GetPrice(pair *exchange.Pair) float64 {
+func (exchange *Huobi) GetPrice(pair *pair.Pair) float64 {
 
 	client := new(client.MarketClient).Init(config.Host)
 	resp, err := client.GetLatestTrade(strings.ToLower(pair.Symbol))

@@ -5,6 +5,7 @@ go 1.21.0
 require (
 	github.com/adshao/go-binance/v2 v2.4.5 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
+	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/golang-jwt/jwt v3.2.1+incompatible // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/huobirdcenter/huobi_golang v0.0.0-20210226095227-8a30a95b6d0d // indirect

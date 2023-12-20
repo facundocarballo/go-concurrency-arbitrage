@@ -97,7 +97,7 @@ func AnalizePrice(
 				// Enviar el resultado positivo al exchange original.
 				fmt.Printf(
 					"(%s) in [%s] is $%f and in [%s] is $%f\n",
-					priceScanned.Pair.Symbol,
+					priceScanned.Pair.GetSymbol(),
 					priceScanned.Exchange.GetName(),
 					priceScanned.Price,
 					ex.GetName(),

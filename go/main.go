@@ -1,13 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"sync"
 
+	"github.com/facundocarballo/go-concurrency-arbitrage/database"
 	"github.com/facundocarballo/go-concurrency-arbitrage/scan"
-	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange"
-	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange/binance"
-	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange/huobi"
 	"github.com/facundocarballo/go-concurrency-arbitrage/types/pair"
 	"github.com/joho/godotenv"
 )
@@ -19,41 +18,25 @@ func main() {
 		log.Fatal("Error loading the .env file")
 	}
 
-	// Exchanges
-	binanceStruct := binance.CreateBinanceExchange()
-	huobiStruct := huobi.CreateHuobiExchange()
+	db, err := sql.Open("mysql", database.GetDSN())
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
 
-	exchanges := []exchange.IExchange{binanceStruct, huobiStruct}
-
-	// Pairs
-	btcUsdt := pair.CreatePair("BTC", "USDT")
-	ethUsdt := pair.CreatePair("ETH", "USDT")
-	eosUsdt := pair.CreatePair("EOS", "USDT")
-	bnbUsdt := pair.CreatePair("BNB", "USDT")
+	exchanges := database.GetAllExchanges(db)
+	tokens := database.GetAllTokens(db)
+	pairs := pair.GetAllPairs(tokens)
 
 	var wg sync.WaitGroup
 
-	wg.Add(4)
-
-	go func() {
-		defer wg.Done()
-		scan.ScanPair(btcUsdt, exchanges)
-	}()
-
-	go func() {
-		defer wg.Done()
-		scan.ScanPair(ethUsdt, exchanges)
-	}()
-
-	go func() {
-		defer wg.Done()
-		scan.ScanPair(eosUsdt, exchanges)
-	}()
-
-	go func() {
-		defer wg.Done()
-		scan.ScanPair(bnbUsdt, exchanges)
-	}()
+	for _, p := range pairs {
+		wg.Add(1)
+		go func(p pair.Pair) {
+			defer wg.Done()
+			scan.ScanPair(&p, exchanges)
+		}(p)
+	}
 
 	wg.Wait()
 }

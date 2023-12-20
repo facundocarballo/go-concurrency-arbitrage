@@ -42,3 +42,7 @@ func BodyToTrade(body []byte) *Trade {
 
 	return &trade
 }
+
+func ExecuteTrade() {
+
+}

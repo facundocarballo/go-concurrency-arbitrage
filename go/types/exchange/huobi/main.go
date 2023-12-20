@@ -2,7 +2,6 @@ package huobi
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -11,36 +10,19 @@ import (
 	"github.com/huobirdcenter/huobi_golang/pkg/client"
 )
 
-type Huobi struct {
-	ApiKey    string
-	SecretKey string
-}
-
-func CreateHuobiExchange() *Huobi {
-	return &Huobi{
-		ApiKey:    "HUOBI_API_KEY",
-		SecretKey: "HUOBI_SECRET_KEY",
-	}
-}
-
-func (exchange *Huobi) GetPrice(pair *pair.Pair) float64 {
-
+func GetPrice(pair *pair.Pair) float64 {
 	client := new(client.MarketClient).Init(config.Host)
-	resp, err := client.GetLatestTrade(strings.ToLower(pair.Symbol))
+	resp, err := client.GetLatestTrade(strings.ToLower(pair.GetSymbol()))
 	if err != nil {
-		fmt.Println("[Huobi] Error al obtener el precio del par:", err)
-		os.Exit(1)
+		fmt.Printf("[Huobi] Cannot get the price of this pair: %s. Error: %s\n", pair.GetSymbol(), err)
+		return 0
 	}
 
 	price, err := strconv.ParseFloat(resp.Data[0].Price.String(), 64)
 	if err != nil {
-		fmt.Println("[Huobi] Error converting the price to float64", err)
-		os.Exit(1)
+		fmt.Printf("[Huobi] Error converting the price to float64. %s\n", err)
+		return 0
 	}
 
 	return price
-}
-
-func (exchange *Huobi) GetName() string {
-	return "Huobi"
 }

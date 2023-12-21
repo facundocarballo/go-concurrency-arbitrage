@@ -26,6 +26,7 @@ func main() {
 
 	exchanges := database.GetAllExchanges(db)
 	tokens := database.GetAllTokens(db)
+	tokens = database.GetAllTokensAmountForEachExchange(tokens, exchanges, db)
 	pairs := pair.GetAllPairs(tokens)
 
 	var wg sync.WaitGroup
@@ -34,7 +35,7 @@ func main() {
 		wg.Add(1)
 		go func(p pair.Pair) {
 			defer wg.Done()
-			scan.ScanPair(&p, exchanges)
+			scan.ScanPair(&p, exchanges, db)
 		}(p)
 	}
 

@@ -2,8 +2,10 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange"
 	"github.com/facundocarballo/go-concurrency-arbitrage/types/token"
 )
 
@@ -21,6 +23,7 @@ func GetAllTokens(db *sql.DB) []token.Token {
 		if err != nil {
 			log.Fatal(err)
 		}
+		token.Amounts = make(map[int]float64)
 		tokens = append(tokens, token)
 	}
 
@@ -29,4 +32,37 @@ func GetAllTokens(db *sql.DB) []token.Token {
 	}
 
 	return tokens
+}
+
+func GetAllTokensAmountForEachExchange(
+	tokens []token.Token,
+	exchanges []exchange.Exchange,
+	db *sql.DB,
+) []token.Token {
+	var newTokens []token.Token
+	for _, token := range tokens {
+		for _, ex := range exchanges {
+			statement, err := db.Prepare(SP_GET_TOKEN_BALANCE_ON_EXCHANGE)
+			if err != nil {
+				fmt.Printf("Error preparing the stored procedure for get the amount of %s in %s. Error: %s\n", token.Name, ex.Name, err)
+				continue
+			}
+			defer statement.Close()
+
+			var amount float64
+			_, err = statement.Exec(ex.Id, token.Id)
+			if err != nil {
+				fmt.Printf("Error getting the amount of %s in %s. Error: %s\n", token.Symbol, ex.Name, err)
+				continue
+			}
+			err = db.QueryRow("SELECT @amount").Scan(&amount)
+			if err != nil {
+				log.Fatal(err)
+			}
+			token.Amounts[ex.Id] = amount
+			// fmt.Printf("[%s] %s: %.2f\n", ex.Name, token.Symbol, amount)
+		}
+		newTokens = append(newTokens, token)
+	}
+	return newTokens
 }

@@ -1,6 +1,12 @@
 package trade
 
-import "encoding/json"
+import (
+	"database/sql"
+	"encoding/json"
+	"log"
+
+	"github.com/facundocarballo/go-concurrency-arbitrage/database"
+)
 
 type Trade struct {
 	Id         int     `json:"id"`
@@ -43,6 +49,18 @@ func BodyToTrade(body []byte) *Trade {
 	return &trade
 }
 
-func ExecuteTrade() {
+func (trade *Trade) Execute(db *sql.DB) {
+	_, err := db.Exec(
+		database.SP_CREATE_TRADE,
+		trade.ExchangeId,
+		trade.TokenIn,
+		trade.AmountIn,
+		trade.TokenOut,
+		trade.AmountOut,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }

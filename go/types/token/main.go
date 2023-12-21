@@ -3,16 +3,23 @@ package token
 import "encoding/json"
 
 type Token struct {
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Symbol string `json:"symbol"`
+	Id      int             `json:"id"`
+	Name    string          `json:"name"`
+	Symbol  string          `json:"symbol"`
+	Amounts map[int]float64 `json:"amounts"`
 }
 
-func CreateToken(id int, name string, symbol string) *Token {
+func CreateToken(
+	id int,
+	name string,
+	symbol string,
+	amounts map[int]float64,
+) *Token {
 	return &Token{
-		Id:     id,
-		Name:   name,
-		Symbol: symbol,
+		Id:      id,
+		Name:    name,
+		Symbol:  symbol,
+		Amounts: amounts,
 	}
 }
 
@@ -28,4 +35,8 @@ func BodyToToken(body []byte) *Token {
 	}
 
 	return &token
+}
+
+func (token *Token) GetAmountOnExchange(exchangeId int) float64 {
+	return token.Amounts[exchangeId]
 }

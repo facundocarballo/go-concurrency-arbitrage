@@ -6,17 +6,17 @@ import (
 
 type Pair struct {
 	TokenA token.Token `json:"token_a"`
-	TokenB token.Token `json:"token_b"`
+	Usdt   token.Token `json:"token_b"`
 }
 
 func (pair *Pair) GetSymbol() string {
-	return pair.TokenA.Symbol + pair.TokenB.Symbol
+	return pair.TokenA.Symbol + pair.Usdt.Symbol
 }
 
-func CreatePair(tokenA token.Token, tokenB token.Token) *Pair {
+func CreatePair(tokenA token.Token, usdt token.Token) *Pair {
 	return &Pair{
 		TokenA: tokenA,
-		TokenB: tokenB,
+		Usdt:   usdt,
 	}
 }
 
@@ -41,7 +41,7 @@ func GetAllPairs(tokens []token.Token) []Pair {
 		}
 		pair := Pair{
 			TokenA: token,
-			TokenB: usdt,
+			Usdt:   usdt,
 		}
 		pairs = append(pairs, pair)
 		pairMap[token.Symbol+usdt.Symbol] = true

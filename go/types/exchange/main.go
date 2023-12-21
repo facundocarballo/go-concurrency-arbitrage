@@ -8,11 +8,6 @@ import (
 	"github.com/facundocarballo/go-concurrency-arbitrage/types/pair"
 )
 
-type IExchange interface {
-	GetPrice(pair *pair.Pair) float64
-	GetName() string
-}
-
 type Exchange struct {
 	Id        int    `json:"id"`
 	Name      string `json:"name"`
@@ -51,8 +46,4 @@ func (exchange *Exchange) GetPrice(pair *pair.Pair) float64 {
 		return huobi.GetPrice(pair)
 	}
 	return 0
-}
-
-func (exchange *Exchange) GetName() string {
-	return exchange.Name
 }

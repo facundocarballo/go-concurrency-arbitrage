@@ -3,7 +3,9 @@ USE GO_CONCURRENCY_ARBITRAGE;
 
 CREATE TABLE Exchange (
 	id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255)
+    name VARCHAR(255),
+    api_key VARCHAR(255),
+    secret_key VARCHAR(255)
 );
 
 CREATE TABLE Token (

@@ -11,7 +11,11 @@ import (
 func CorrectTime(timeA *time.Time, timeB *time.Time) bool {
 	diff := timeA.Nanosecond() - timeB.Nanosecond()
 
-	return diff < 100 || diff > -100
+	if diff < 0 {
+		return diff > -100
+	}
+
+	return diff < 100
 }
 
 func CorrectDifference(maxPrice float64, minPrice float64) bool {
@@ -43,10 +47,6 @@ func WriteDifferenceFinded(maxScanned *Scanned, minScanned *Scanned) {
 }
 
 func GetAmountToBuy(price float64, amount float64) float64 {
-	return (amount * PERCENTAGE_OF_USDT) / price
-}
-
-func GetAmountToSell(price float64, amount float64) float64 {
 	return (amount * PERCENTAGE_OF_USDT) / price
 }
 

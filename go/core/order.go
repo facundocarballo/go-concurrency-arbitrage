@@ -19,22 +19,18 @@ const PERCENTAGE_OF_USDT = 1
 
 var mutex sync.Mutex
 
-func MakeOrder(scannedA *Scanned, scannedB *Scanned) bool {
-	if scannedA.Price == 0 || scannedB.Price == 0 {
+func MakeOrder(maxScanned *Scanned, minScanned *Scanned) bool {
+	if maxScanned.Price == 0 || minScanned.Price == 0 {
 		return false
 	}
 
-	if scannedA.Price == scannedB.Price {
-		return false
-	}
-
-	if !CorrectDifference(scannedA.Price, scannedB.Price) {
+	if !CorrectDifference(maxScanned.Price, minScanned.Price) {
 		return false
 	} else {
-		WriteDifferenceFinded(scannedA, scannedB)
+		WriteDifferenceFinded(maxScanned, minScanned)
 	}
 
-	return CorrectTime(&scannedA.Timestamp, &scannedB.Timestamp)
+	return CorrectTime(&maxScanned.Timestamp, &minScanned.Timestamp)
 }
 
 func BuyTokenCheapExchange(

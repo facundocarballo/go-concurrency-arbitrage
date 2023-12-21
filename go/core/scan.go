@@ -3,6 +3,7 @@ package core
 import (
 	"database/sql"
 	"fmt"
+	"math"
 	"sync"
 	"time"
 
@@ -17,17 +18,22 @@ type Scanned struct {
 	Timestamp time.Time         `json:"timestamp"`
 }
 
-var mapPairMutex sync.Mutex
+var writeMapMutex sync.Mutex
 
 func GetPrices(
-	ch chan Scanned,
 	mapPair map[exchange.Exchange]Scanned,
 	pair *pair.Pair,
 	exchanges []exchange.Exchange,
+	priceGettedChannel *chan bool,
+	mapPairMutex *sync.Mutex,
 ) {
 	for {
+		mapPairMutex.Lock()
+		var wg sync.WaitGroup
 		for _, exc := range exchanges {
+			wg.Add(1)
 			go func(ex exchange.Exchange) {
+				defer wg.Done()
 				price := ex.GetPrice(pair)
 				priceScanned := Scanned{
 					Pair:      *pair,
@@ -35,72 +41,79 @@ func GetPrices(
 					Price:     price,
 					Timestamp: time.Now(),
 				}
-				ch <- priceScanned
-				mapPairMutex.Lock()
+				writeMapMutex.Lock()
 				mapPair[ex] = priceScanned
-				mapPairMutex.Unlock()
+				writeMapMutex.Unlock()
 			}(exc)
 		}
+		wg.Wait()
+		*priceGettedChannel <- true
+		mapPairMutex.Unlock()
 		time.Sleep(time.Second * 15)
 	}
 }
 
 func AnalizePrice(
-	ch chan Scanned,
 	mapPair map[exchange.Exchange]Scanned,
 	mapOrders map[Order]bool,
 	db *sql.DB,
+	priceGettedChannel *chan bool,
+	mapPairMutex *sync.Mutex,
 ) {
 	for {
-		priceScanned := <-ch
-		mapPairMutex.Lock()
-		for _, scanned := range mapPair {
-			order := Order{
-				ExchangeA: priceScanned.Exchange.Name,
-				ExchangeB: scanned.Exchange.Name,
-				Timestamp: time.Now(),
-			}
-			inverseOrder := Order{
-				ExchangeA: scanned.Exchange.Name,
-				ExchangeB: priceScanned.Exchange.Name,
-				Timestamp: time.Now(),
-			}
-
-			if mapOrders[order] || mapOrders[inverseOrder] {
-				fmt.Printf("Order already maked...\n")
-				continue
-			}
-
-			if MakeOrder(&priceScanned, &scanned) {
-				if priceScanned.Price < scanned.Price {
-					ExecuteOrder(&priceScanned, &scanned, db)
-				} else {
-					ExecuteOrder(&scanned, &priceScanned, db)
-				}
-				mapOrders[order] = true
-			}
+		maxPriceScanned := Scanned{
+			Price: 0,
 		}
+		minPriceScanned := Scanned{
+			Price: math.MaxFloat64,
+		}
+
+		<-*priceGettedChannel
+		mapPairMutex.Lock()
+		GetMaxAndMinPriceScanned(&maxPriceScanned, &minPriceScanned, mapPair)
 		mapPairMutex.Unlock()
+
+		order := Order{
+			ExchangeA: maxPriceScanned.Exchange.Name,
+			ExchangeB: minPriceScanned.Exchange.Name,
+			Timestamp: time.Now(),
+		}
+		inverseOrder := Order{
+			ExchangeA: minPriceScanned.Exchange.Name,
+			ExchangeB: maxPriceScanned.Exchange.Name,
+			Timestamp: time.Now(),
+		}
+
+		if mapOrders[order] || mapOrders[inverseOrder] {
+			fmt.Printf("Order already maked...\n")
+			continue
+		}
+
+		if MakeOrder(&maxPriceScanned, &minPriceScanned) {
+			ExecuteOrder(&minPriceScanned, &maxPriceScanned, db)
+			mapOrders[order] = true
+		}
 	}
 }
 
 func ScanPair(pair *pair.Pair, exchanges []exchange.Exchange, db *sql.DB) {
-	chPair := make(chan Scanned)
 	mapPair := make(map[exchange.Exchange]Scanned)
 	mapOrders := make(map[Order]bool)
 
+	var mapPairMutex sync.Mutex
+	var priceGettedChannel = make(chan bool)
 	var wg sync.WaitGroup
 
 	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
-		GetPrices(chPair, mapPair, pair, exchanges)
+		GetPrices(mapPair, pair, exchanges, &priceGettedChannel, &mapPairMutex)
 	}()
 
 	go func() {
 		defer wg.Done()
-		AnalizePrice(chPair, mapPair, mapOrders, db)
+		AnalizePrice(mapPair, mapOrders, db, &priceGettedChannel, &mapPairMutex)
 	}()
 
 	wg.Wait()

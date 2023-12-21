@@ -9,6 +9,12 @@ import (
 	"github.com/facundocarballo/go-concurrency-arbitrage/types/token"
 )
 
+func GetAllTokensWithBalance(db *sql.DB, exchanges []exchange.Exchange) []token.Token {
+	tokens := GetAllTokens(db)
+	tokens = GetAllTokensAmountForEachExchange(tokens, exchanges, db)
+	return tokens
+}
+
 func GetAllTokens(db *sql.DB) []token.Token {
 	rows, err := db.Query(Q_GET_ALL_TOKENS)
 	if err != nil {

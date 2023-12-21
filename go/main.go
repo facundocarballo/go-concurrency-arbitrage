@@ -5,8 +5,8 @@ import (
 	"log"
 	"sync"
 
+	"github.com/facundocarballo/go-concurrency-arbitrage/core"
 	"github.com/facundocarballo/go-concurrency-arbitrage/database"
-	"github.com/facundocarballo/go-concurrency-arbitrage/scan"
 	"github.com/facundocarballo/go-concurrency-arbitrage/types/pair"
 	"github.com/joho/godotenv"
 )
@@ -25,19 +25,16 @@ func main() {
 	defer db.Close()
 
 	exchanges := database.GetAllExchanges(db)
-	tokens := database.GetAllTokens(db)
-	tokens = database.GetAllTokensAmountForEachExchange(tokens, exchanges, db)
+	tokens := database.GetAllTokensWithBalance(db, exchanges)
 	pairs := pair.GetAllPairs(tokens)
 
 	var wg sync.WaitGroup
-
 	for _, p := range pairs {
 		wg.Add(1)
 		go func(p pair.Pair) {
 			defer wg.Done()
-			scan.ScanPair(&p, exchanges, db)
+			core.ScanPair(&p, exchanges, db)
 		}(p)
 	}
-
 	wg.Wait()
 }

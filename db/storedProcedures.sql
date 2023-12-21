@@ -1,7 +1,7 @@
 DELIMITER //
-CREATE PROCEDURE CreateExchange(IN name VARCHAR(255))
+CREATE PROCEDURE CreateExchange(IN name VARCHAR(255), IN api_key VARCHAR(255), IN secret_key VARCHAR(255))
 BEGIN
-	INSERT INTO Exchange (name) VALUES (name);
+	INSERT INTO Exchange (name, api_key, secret_key) VALUES (name, api_key, secret_key);
 END //
 DELIMITER ;
 

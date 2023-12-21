@@ -1,4 +1,4 @@
-package bybit
+package bitget
 
 import (
 	"encoding/json"
@@ -10,20 +10,20 @@ import (
 	"github.com/facundocarballo/go-concurrency-arbitrage/types/pair"
 )
 
-type ByBitResult struct {
-	Price string `json:"last_price"`
+type BitgetResult struct {
+	Price string `json:"lastPr"`
 }
 
-type BybitResponse struct {
-	Result []ByBitResult `json:"result"`
+type BitgetResponse struct {
+	Data []BitgetResult `json:"data"`
 }
 
-func BodyToBybitResponse(body []byte) *BybitResponse {
+func BodyToBitgetResponse(body []byte) *BitgetResponse {
 	if len(body) == 0 {
 		return nil
 	}
 
-	var res BybitResponse
+	var res BitgetResponse
 	err := json.Unmarshal(body, &res)
 	if err != nil {
 		return nil
@@ -33,10 +33,10 @@ func BodyToBybitResponse(body []byte) *BybitResponse {
 }
 
 func GetPrice(pair *pair.Pair) float64 {
-	url := "https://api.bybit.com/v2/public/tickers?symbol=" + pair.GetSymbol()
+	url := "https://api.bitget.com/api/v2/spot/market/tickers?symbol=" + pair.GetSymbol()
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Printf("[Bybit] Error creating the request. %s\n", err)
+		fmt.Printf("[Bitget] Error creating the request. %s\n", err)
 		return 0
 	}
 
@@ -54,13 +54,13 @@ func GetPrice(pair *pair.Pair) float64 {
 		return 0
 	}
 
-	response := BodyToBybitResponse(body)
+	response := BodyToBitgetResponse(body)
 	if response == nil {
 		fmt.Printf("Error transforming the response to a data structure.\n")
 		return 0
 	}
 
-	price, err := strconv.ParseFloat(response.Result[0].Price, 64)
+	price, err := strconv.ParseFloat(response.Data[0].Price, 64)
 	if err != nil {
 		fmt.Printf("Error converting the string to float64.\n")
 		return 0

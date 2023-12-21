@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange/binance"
+	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange/bybit"
 	"github.com/facundocarballo/go-concurrency-arbitrage/types/exchange/huobi"
 	"github.com/facundocarballo/go-concurrency-arbitrage/types/pair"
 )
@@ -44,6 +45,8 @@ func (exchange *Exchange) GetPrice(pair *pair.Pair) float64 {
 		return binance.GetPrice(pair, exchange.ApiKey, exchange.SecretKey)
 	case 2:
 		return huobi.GetPrice(pair)
+	case 4:
+		return bybit.GetPrice(pair)
 	}
 	return 0
 }

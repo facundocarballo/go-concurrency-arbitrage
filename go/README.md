@@ -47,8 +47,8 @@ Searching for some % difference between the max price of that pair of tokens in 
 
 5. Create an instance of each exchange in your database.
 > Example for Binance
-API Key: "Hello Everyone 👋🏼"
-Secret Key: "We love go ❤️"
+> API Key: "Hello Everyone 👋🏼"
+> Secret Key: "We love go ❤️"
 
 
 ```sql
@@ -59,10 +59,10 @@ Secret Key: "We love go ❤️"
 > Example for BTC and USDT
 
 ```sql
-    CALL CreateToken("Bitcoin", "BTC")
+    CALL CreateToken("Bitcoin", "BTC");
 ```
 ```sql
-    CALL CreateToken("USD Tether", "USDT")
+    CALL CreateToken("USD Tether", "USDT");
 ```
 
 7. Create an **.env** file with this data
